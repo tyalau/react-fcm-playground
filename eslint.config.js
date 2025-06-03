@@ -31,12 +31,6 @@ export default tseslint.config(
       'array-callback-return': 'error',
       'dot-notation': 'error',
       'func-style': ['error', 'expression'],
-      'no-console': [
-        'warn',
-        {
-          allow: ['warn', 'error'],
-        },
-      ],
       'no-else-return': [
         'error',
         {

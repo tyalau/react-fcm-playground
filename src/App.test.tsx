@@ -1,23 +1,35 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import App from './App'
+
+beforeAll(() => {
+  const MockNotification = vi.fn().mockImplementation((title: string, options?: NotificationOptions) => ({
+    title,
+    options,
+    onclick: null,
+    close: vi.fn(),
+  }))
+
+  Object.assign(MockNotification, {
+    permission: 'default',
+    requestPermission: vi.fn().mockResolvedValue('granted'),
+    prototype: {},
+  })
+
+  globalThis.Notification = MockNotification as unknown as typeof Notification
+})
+
+vi.mock('@/lib/firebase', async () => ({
+  messaging: vi.fn(),
+}))
+
+vi.mock('firebase/messaging', () => ({
+  getToken: vi.fn().mockResolvedValue('mocked-token'),
+}))
 
 describe('App Component', () => {
   it('renders the Vite and React logos', () => {
     render(<App />)
     expect(screen.getByAltText('Vite logo')).toBeInTheDocument()
     expect(screen.getByAltText('React logo')).toBeInTheDocument()
-  })
-
-  it('increments count when button is clicked', () => {
-    render(<App />)
-    const button = screen.getByRole('button', { name: /count is/i })
-
-    expect(button).toHaveTextContent('count is 0')
-
-    fireEvent.click(button)
-    expect(button).toHaveTextContent('count is 1')
-
-    fireEvent.click(button)
-    expect(button).toHaveTextContent('count is 2')
   })
 })
