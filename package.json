@@ -1,11 +1,12 @@
 {
-  "name": "react-ts-boilerplate",
+  "name": "react-fcm-playground",
+  "description": "A playground for Firebase Cloud Messaging (FCM) with React",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "engines": {
     "node": ">= 20.15",
-    "pnpm": ">=10.3.0"
+    "pnpm": ">=10.6.3"
   },
   "scripts": {
     "dev": "vite",
