@@ -34,17 +34,17 @@ jobs:
             # Extract the first non-empty line after the YAML front matter
             first_content_line=$(awk 'BEGIN {skip=0} /^---$/ {if (skip==0) {skip=1; next} else {skip=2; next}} skip==2 && NF{print; exit}' "$file")
 
-            # Ensure the first line is NOT a list item (- )
-            if [[ "$first_content_line" =~ ^- ]]; then
-              echo "❌ Changeset file '$file' must start with a sentence, not a list ('- ')."
+            # Ensure the first line starts with an alphabet character (A–Z or a–z)
+            if ! [[ "$first_content_line" =~ ^[A-Za-z] ]]; then
+              echo "Changeset file '$file' must start with a alphabet character."
               ERROR_FOUND=1
             fi
           done
 
           if [ "$ERROR_FOUND" -eq 1 ]; then
-            echo "❌ One or more changeset files are incorrectly formatted. Failing the validation."
+            echo "One or more changeset files are incorrectly formatted. Failing the validation."
             exit 1
           fi
 
       - name: Validation Success
-        run: echo "✅ All changeset files are correctly formatted."
+        run: echo "All changeset files are correctly formatted."
