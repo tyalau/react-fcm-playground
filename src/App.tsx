@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import useFcm from '@/hooks/useFcm'
 import reactLogo from '@/assets/img/react.svg'
 import '@/App.css'
 import viteLogo from '/vite.svg'
 
 const App = () => {
   const [count, setCount] = useState(0)
+  useFcm()
 
   return (
     <>
