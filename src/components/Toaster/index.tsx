@@ -1,13 +1,10 @@
-'use client'
-
 import { Toaster as ChakraToaster, Portal, Spinner, Stack, Toast, createToaster } from '@chakra-ui/react'
 
-export const toaster = createToaster({
-  placement: 'bottom-end',
-  pauseOnPageIdle: true,
-})
+type ToastProps = {
+  toaster: ReturnType<typeof createToaster>
+}
 
-export const Toaster = () => {
+export default function Toaster({ toaster }: ToastProps) {
   return (
     <Portal>
       <ChakraToaster toaster={toaster} insetInline={{ mdDown: '4' }}>
