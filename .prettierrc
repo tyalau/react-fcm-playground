@@ -10,6 +10,7 @@
     "^@/constants/",
     "^@/types/",
     "^@/utils/",
+    "^@/lib/",
     "^@/hooks/",
     "^@/services/",
     "^@/components/",
