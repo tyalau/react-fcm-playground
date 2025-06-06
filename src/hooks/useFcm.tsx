@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { onMessage } from 'firebase/messaging'
 import { messaging } from '@/lib/firebase'
 
-const useFcm = () => {
+export default function useFcm() {
   useEffect(() => {
     // check if browser support service worker
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
@@ -34,5 +34,3 @@ const useFcm = () => {
     setUpMessaging()
   }, [])
 }
-
-export default useFcm

@@ -1,62 +1,108 @@
 import { useEffect, useState } from 'react'
+import { Button, Clipboard, Container, Flex, Heading, IconButton, Input, InputGroup, Stack, Text } from '@chakra-ui/react'
 import { getToken } from 'firebase/messaging'
-import useFcm from '@/hooks/useFcm'
-import reactLogo from '@/assets/img/react.svg'
-import '@/App.css'
 import { messaging } from '@/lib/firebase'
-import viteLogo from '/vite.svg'
+import useFcm from '@/hooks/useFcm'
+import useToaster from '@/hooks/useToaster'
+import Dialog from '@/components/Dialog'
+import Toaster from '@/components/Toaster'
+import ColorModeButton from '@/containers/ColorModeButton'
 
 const App = () => {
-  const [permission, setPermission] = useState(Notification.permission)
+  const [permission, setPermission] = useState<NotificationPermission>(Notification.permission)
+  const [token, setToken] = useState<string>('')
+  const [isOpen, setIsOpen] = useState(permission === 'default')
+
+  const toaster = useToaster()
 
   const requestNotificationPermission = async () => {
     try {
       const result = await Notification.requestPermission()
       setPermission(result)
+      setIsOpen(false)
     } catch (error) {
       console.error('Error getting notification permission: ', error)
     }
   }
+
+  const ClipboardIconButton = () => {
+    return (
+      <Clipboard.Trigger asChild>
+        <IconButton variant="surface" size="xs" me="-2" disabled={!token} aria-label="Copy to clipboard">
+          <Clipboard.Indicator />
+        </IconButton>
+      </Clipboard.Trigger>
+    )
+  }
   useFcm()
 
   useEffect(() => {
+    if (permission === 'default') {
+      setIsOpen(true)
+    }
+  }, [permission])
+
+  useEffect(() => {
     if (permission !== 'granted') return
-    const generateToken = () => {
-      getToken(messaging, {
-        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-      })
-        .then((token) => {
-          if (token) {
-            console.log('[debug] token: ', token)
-          } else {
-            console.warn('No registration token available. Request permission to generate one.')
-          }
+    const generateToken = async () => {
+      try {
+        const token = await getToken(messaging, {
+          vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
         })
-        .catch((error) => {
-          console.error('Error when retrieving token: ', error)
-        })
+        if (token) {
+          setToken(token)
+          toaster.create({
+            title: 'Registration token generated.',
+            type: 'success',
+            duration: 10000,
+            description: 'Copy to clipboard?',
+            action: {
+              label: 'Copy',
+              onClick: () => {
+                navigator.clipboard.writeText(token)
+              },
+            },
+          })
+        } else {
+          console.warn('No registration token available. Request permission to generate one.')
+        }
+      } catch (error) {
+        console.error('Error when generating token: ', error)
+      }
     }
     generateToken()
   }, [permission])
 
-  useEffect(() => {}, [])
-
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button type="button" disabled={permission !== 'default'} onClick={requestNotificationPermission}>
-          Request Notification Permission
-        </button>
-      </div>
+      <Dialog
+        open={isOpen}
+        title="Enable Notification"
+        body={<p>We need your permission to show notifications. Please enable notifications in your browser settings.</p>}
+        footer={<Button onClick={requestNotificationPermission}>Enable</Button>}
+      />
+      <Toaster toaster={toaster} />
+      <Container>
+        <Flex justifyContent="space-between" alignItems="center" py="2">
+          <Heading>Firebase Cloud Messaging Playground</Heading>
+          <ColorModeButton />
+        </Flex>
+        <Stack>
+          <Clipboard.Root maxW="300px" value={token}>
+            <Clipboard.Label textStyle="label">Registration Token</Clipboard.Label>
+            <InputGroup endElement={<ClipboardIconButton />}>
+              <Clipboard.Input asChild>
+                <Input disabled={!token} />
+              </Clipboard.Input>
+            </InputGroup>
+          </Clipboard.Root>
+          {permission === 'denied' && (
+            <Text fontSize="sm" color="red.500">
+              Notification permission denied. Please enable it in your browser / device settings.
+            </Text>
+          )}
+        </Stack>
+      </Container>
     </>
   )
 }
