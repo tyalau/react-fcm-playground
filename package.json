@@ -10,8 +10,10 @@
   },
   "scripts": {
     "dev": "pnpm run prebuild && vite",
-    "prebuild": "dotenvx run -- node scripts/generate-fcm-sw.js",
+    "prebuild": "node scripts/generate-fcm-sw.js",
+    "prebuild:local": "dotenvx run -- node scripts/generate-fcm-sw.js",
     "build": "tsc -b && vite build",
+    "build:local": "tsc -b && vite build",
     "lint": "eslint .",
     "prettier:fix": "prettier --write \"**/*.{js,jsx,mjs,ts,tsx,css,scss,md,json}\"",
     "preview": "vite preview",
