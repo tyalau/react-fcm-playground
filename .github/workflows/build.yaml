@@ -16,12 +16,40 @@ env:
   VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
   VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
   VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+  VITE_FIREBASE_VAPID_KEY: ${{ secrets.VITE_FIREBASE_VAPID_KEY }}
 jobs:
    build-check:
     name: Build & Dependency Check
     runs-on: ubuntu-latest
-
+    environment: prod
     steps:
+      - name: Check if all Firebase secrets are set
+        run: |
+          MISSING=0
+
+          check_secret() {
+            NAME=$1
+            VALUE=$2
+            if [ -z "$VALUE" ]; then
+              echo "$NAME is not set!"
+              MISSING=1
+            else
+              echo "$NAME is set."
+            fi
+          }
+
+          check_secret "VITE_FIREBASE_API_KEY" "${{ secrets.VITE_FIREBASE_API_KEY }}"
+          check_secret "VITE_FIREBASE_AUTH_DOMAIN" "${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}"
+          check_secret "VITE_FIREBASE_PROJECT_ID" "${{ secrets.VITE_FIREBASE_PROJECT_ID }}"
+          check_secret "VITE_FIREBASE_STORAGE_BUCKET" "${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}"
+          check_secret "VITE_FIREBASE_MESSAGING_SENDER_ID" "${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}"
+          check_secret "VITE_FIREBASE_APP_ID" "${{ secrets.VITE_FIREBASE_APP_ID }}"
+          check_secret "VITE_FIREBASE_VAPID_KEY" "${{ secrets.VITE_FIREBASE_VAPID_KEY }}"
+
+          if [ "$MISSING" -eq 1 ]; then
+            echo "One or more Firebase secrets are missing."
+            exit 1
+          fi
       # Checkout the code
       - name: Checkout repository
         uses: actions/checkout@v4
