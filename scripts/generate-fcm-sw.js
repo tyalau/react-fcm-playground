@@ -25,4 +25,6 @@ const result = template
 
 fs.writeFileSync(outputPath, result)
 
+console.log(result)
+
 console.log('firebase-messaging-sw.js generated.')
