@@ -9,7 +9,9 @@ import Toaster from '@/components/Toaster'
 import ColorModeButton from '@/containers/ColorModeButton'
 
 const App = () => {
-  const [permission, setPermission] = useState<NotificationPermission>(Notification.permission)
+  const [permission, setPermission] = useState<NotificationPermission>(
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
+  )
   const [token, setToken] = useState<string>('')
   const [isOpen, setIsOpen] = useState(permission === 'default')
 
