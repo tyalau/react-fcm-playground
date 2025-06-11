@@ -78,7 +78,7 @@ const App = () => {
       <Dialog
         open={isOpen}
         title="Enable Notification"
-        body={<p>We need your permission to show notifications. Please enable notifications in your browser settings.</p>}
+        body={<p>{"We'd like to send you notifications. Tap 'Enable' to continue."}</p>}
         footer={<Button onClick={requestNotificationPermission}>Enable</Button>}
       />
       <Toaster toaster={toaster} />
