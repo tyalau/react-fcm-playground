@@ -9,11 +9,11 @@
     "pnpm": ">=10.6.3"
   },
   "scripts": {
-    "dev": "pnpm run prebuild && vite",
+    "dev": "ENV=local pnpm run prebuild:env && vite",
     "prebuild": "node scripts/generate-fcm-sw.js",
-    "prebuild:local": "dotenvx run -- node scripts/generate-fcm-sw.js",
+    "prebuild:env": "dotenvx run -f .env.$ENV -- node scripts/generate-fcm-sw.js",
     "build": "tsc -b && vite build",
-    "build:local": "tsc -b && vite build",
+    "build:env": "tsc -b && vite build",
     "lint": "eslint .",
     "prettier:fix": "prettier --write \"**/*.{js,jsx,mjs,ts,tsx,css,scss,md,json}\"",
     "preview": "vite preview",
