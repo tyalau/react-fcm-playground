@@ -9,7 +9,9 @@ import Toaster from '@/components/Toaster'
 import ColorModeButton from '@/containers/ColorModeButton'
 
 const App = () => {
-  const [permission, setPermission] = useState<NotificationPermission>(Notification.permission)
+  const [permission, setPermission] = useState<NotificationPermission>(
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
+  )
   const [token, setToken] = useState<string>('')
   const [isOpen, setIsOpen] = useState(permission === 'default')
 
@@ -78,7 +80,7 @@ const App = () => {
       <Dialog
         open={isOpen}
         title="Enable Notification"
-        body={<p>We need your permission to show notifications. Please enable notifications in your browser settings.</p>}
+        body={<p>{"We'd like to send you notifications. Tap 'Enable' to continue."}</p>}
         footer={<Button onClick={requestNotificationPermission}>Enable</Button>}
       />
       <Toaster toaster={toaster} />
