@@ -1,98 +1,129 @@
-# React + TypeScript + Vite Boilerplate
+# Firebase Cloud Messaging Playground
 
-This is a boilerplate for developing React applications using TypeScript and Vite. It includes a set of commonly used development tools to ensure code quality, consistency, and smooth CI/CD integration.
+This is a demo project showcasing Firebase Cloud Messaging (FCM) in a modern React app.
+It is based on my [react-ts-boilerplate](https://github.com/tyalau/react-ts-boilerplate) Git Template Repository.
 
 ## Technologies
 
-- [**React**](https://react.dev/) - A JavaScript library for building user interfaces.
-- [**TypeScript**](https://www.typescriptlang.org/) - Statically typed JavaScript for an improved development experience.
-- [**Vite**](https://vitejs.dev/) - A fast build tool and development server.
+- [**React**](https://react.dev/) – A JavaScript library for building user interfaces.
+- [**TypeScript**](https://www.typescriptlang.org/) – Statically typed JavaScript for an improved development experience.
+- [**Vite**](https://vitejs.dev/) – A fast build tool and development server.
+- [**Chakra UI**](https://chakra-ui.com/) – A simple, modular React component library.
 
 ## Development Tools
 
-- [**Commitlint**](https://commitlint.js.org/) - Enforces conventional commit messages.
-- [**Prettier**](https://prettier.io/) - Ensures consistent code formatting and import order.
-- [**ESLint**](https://eslint.org/) - Lints code to maintain quality and prevent errors.
+- [**Commitlint**](https://commitlint.js.org/) – Enforces conventional commit messages.
+- [**Prettier**](https://prettier.io/) – Ensures consistent code formatting and import order.
+- [**ESLint**](https://eslint.org/) – Lints code to maintain quality and prevent errors.
 - [**Lint-staged**](https://github.com/okonet/lint-staged) - Runs pre-commit checks on staged files, ensuring only formatted code is committed.
-- [**Vitest**](https://vitest.dev/) - A unit testing framework.
-- [**Changeset**](https://github.com/changesets/changesets) - Manages versioning and release notes.
-- [**GitHub Actions**](https://github.com/features/actions) - Automates linting, testing, and formatting checks on pull requests and pushes.
+- [**Vitest**](https://vitest.dev/) – A unit testing framework.
+- [**Changeset**](https://github.com/changesets/changesets) – Manages versioning and changelogs.
+- [**GitHub Actions**](https://github.com/features/actions) - Automates linting, testing, and formatting in CI.
 
 ## Prerequisites
 
-Ensure you have the following installed on your machine:
+Ensure you have the followings:
 
-- **Node.js** (>= v20.15)
-- **PNPM** (>= v10.3.0)
+- [Node.js](https://nodejs.org/) (>= v22.16.0)
+- [PNPM](https://pnpm.io/) (>= v10.6.3)
+- A [Firebase project](https://firebase.google.com/) with Cloud Messaging enabled
+  (and VAPID key + web app credentials generated)
 
 ## Getting Started
 
-1. **Clone the repository**
-
-   ```sh
-   git clone <repo-url>
-   cd <project-directory>
-   ```
-
-2. **Install dependencies**
-
-   ```sh
-   pnpm install
-   ```
-
-3. **Run the development server**
-
-   ```sh
-   pnpm dev
-   ```
-
-Open the app at [http://localhost:5173](http://localhost:5173).
-
-## Recommended Folder Structure
-
-File imports within these directories will be automatically ordered by Prettier's import order configuration.
+Clone the repository:
 
 ```bash
-/src
-├── assets     # Static assets
-│ ├── img      # Image files
-│ ├── styles   # Global styles
-├── components # Presentational components
-├── constants  # Constants and configuration
-├── containers # Container components
-├── hooks      # Custom React hooks
-├── services   # Business logic and API calls
-├── types      # TypeScript types and interfaces
-├── utils      # Utility functions
+git clone <repo-url>
+cd <project-directory>
 ```
 
-## Path Aliases
+Install dependencies:
 
-To simplify imports, this project uses the `@/*` alias to refer to the `./src/*` directory.
+```bash
+pnpm install
+```
 
-Example usage:
+Set up your environment variables:
 
-```tsx
-import MyComponent from '@/components/MyComponent'
+```bash
+cp .env.sample .env.local
+```
+
+Edit `.env.local` with your Firebase config:
+
+```env
+VITE_FIREBASE_API_KEY=your-firebase-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
+VITE_FIREBASE_VAPID_KEY=your-public-vapid-key
+```
+
+Run the dev server:
+
+```bash
+pnpm dev
 ```
 
 ## Available Scripts
 
-The following scripts are available:
+- `pnpm build` – Build the app for production with env variables.
+- `pnpm build:env` – Build with custom environment (e.g. `ENV=dev pnpm build:env`).
+- `pnpm lint` – Run ESLint for code quality.
+- `pnpm prettier:fix` – Format code using Prettier.
+- `pnpm test` – Run unit tests with Vitest.
+- `pnpm test:watch` – Watch mode for tests.
+- `pnpm test:ui` – Launch the Vitest UI for interactive test execution.
 
-- **`pnpm build`** - Builds the app for production using Vite.
-- **`pnpm lint`** - Runs ESLint to check code quality.
-- **`pnpm prettier:fix`** - Formats code and assets using Prettier.
-- **`pnpm test`** - Runs unit tests using Vitest.
-- **`pnpm test:watch`** - Watches for changes and re-runs tests automatically.
-- **`pnpm test:ui`** - Launches the Vitest UI for interactive test execution.
+## How to Use
 
-## Applying Template Updates
+1. On page load, a modal will appear asking you to enable notifications.
 
-If the template is updated, apply the changes using the following commands:
+   ![Enable Notification Modal](./assets/enable-notification-modal.png)
 
-```sh
-git remote add template <template-repo-url>
-git fetch template
-git merge template/main --allow-unrelated-histories
-```
+2. Click **"Enable"** to request notification permission from the browser.
+
+   ![Notification Permission Prompt](./assets/notification-permission-prompt.png)
+
+3. If permission is granted:
+
+   - A success toast will appear, and you can click **"Copy"** to copy the token to your clipboard.
+
+     ![Token Generated Toast](./assets/token-generate-toast.png)
+
+   - Your FCM token will also be displayed in a text field.
+
+     ![FCM Token Text Field](./assets/fcm-token-text-field.png)
+
+4. You can use the generated token to send push notifications via the [Firebase Cloud Messaging v1 API](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages/send) (learn more about [message types](https://firebase.google.com/docs/cloud-messaging/concept-options#notifications_and_data_messages)):
+
+   - **Notification Message**
+
+     ```json
+     {
+       "message": {
+         "token": "<fcm_token>",
+         "notification": {
+           "title": "Simple Message",
+           "body": "This is a test message from the FCM v1 API"
+         }
+       }
+     }
+     ```
+
+   - **Data Message**
+
+     ```json
+     {
+       "message": {
+         "token": "<fcm_token>",
+         "data": {
+           "title": "Simple Message",
+           "body": "This is a test message from the FCM v1 API"
+         }
+       }
+     }
+     ```
