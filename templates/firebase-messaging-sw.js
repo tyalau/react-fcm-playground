@@ -1,5 +1,6 @@
 importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js')
 importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js')
+importScripts('/utils/notification.js') // Ensure this path matches your build output
 
 // Initialize the Firebase app in the service worker by passing in
 // your app's Firebase config object.
@@ -25,10 +26,9 @@ messaging.onBackgroundMessage((payload) => {
   console.log('Received background message ', payload)
   if (payload.notification) return
   // Customize notification here
-  const { title, body, ...props } = payload.data // Custom URL or other data sent with the notification
+  const { title, body } = NotificationUtils.composeNotification(payload.data)
   const notificationOptions = {
     body,
-    data: props, // Attach URL for click event handling
   }
 
   // Show the notification with custom data

@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 import { onMessage } from 'firebase/messaging'
+import { DataMessage } from '@/types/notification'
+import { composeNotification } from '@/utils/notification'
 import { messaging } from '@/lib/firebase'
 
 export default function useFcm() {
@@ -20,14 +22,14 @@ export default function useFcm() {
       const unsubscribe = onMessage(messaging, (payload) => {
         if (Notification.permission !== 'granted') return
         console.log('Received foreground message', payload)
-        const { title, body } = payload.notification || payload.data || {}
-        if (title && body) {
-          navigator.serviceWorker.ready.then((registration) => {
-            registration.showNotification(title, {
-              body,
-            })
+        if (!payload.notification && !payload.data) return
+        const { title, body } = payload.notification ?? composeNotification(payload.data as DataMessage)
+        if (!title) return
+        navigator.serviceWorker.ready.then((registration) => {
+          registration.showNotification(title, {
+            body,
           })
-        }
+        })
       })
       return () => unsubscribe()
     }
