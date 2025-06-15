@@ -116,14 +116,16 @@ pnpm dev
 
    - **Data Message**
 
+     To customize the payload, update the following files:
+
+     - [`DataMessage`](./src/types/notification.ts): Defines the data payload.
+     - [`composeNotification`](./src/utils/notification.ts): Handles how the data payload is converted into a notification.
+
      ```json
      {
        "message": {
          "token": "<fcm_token>",
-         "data": {
-           "title": "Simple Message",
-           "body": "This is a test message from the FCM v1 API"
-         }
+         "data": <your_custom_data_payload>
        }
      }
      ```
