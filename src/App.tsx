@@ -67,9 +67,16 @@ const App = () => {
           })
         } else {
           console.warn('No registration token available. Request permission to generate one.')
+          throw new Error('No registration token available')
         }
       } catch (error) {
         console.error('Error when generating token: ', error)
+        toaster.create({
+          title: 'Error',
+          type: 'error',
+          duration: 10000,
+          description: 'Unable to generate registration token.',
+        })
       }
     }
     generateToken()
