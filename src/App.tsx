@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Button, Clipboard, Container, Flex, Heading, IconButton, Input, InputGroup, Stack, Text } from '@chakra-ui/react'
+import { Button, Clipboard, Container, Field, Flex, Heading, IconButton, Input, InputGroup, Stack, Text } from '@chakra-ui/react'
 import { getToken } from 'firebase/messaging'
+import { useForm, Controller } from 'react-hook-form'
+import { Message } from '@/types/notification'
 import { messaging } from '@/lib/firebase'
 import useFcm from '@/hooks/useFcm'
 import useToaster from '@/hooks/useToaster'
 import Dialog from '@/components/Dialog'
+import JsonSnippet from '@/components/JsonSnippet'
 import Toaster from '@/components/Toaster'
 import ColorModeButton from '@/containers/ColorModeButton'
 
@@ -12,8 +15,35 @@ const App = () => {
   const [permission, setPermission] = useState<NotificationPermission>(
     typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
   )
-  const [token, setToken] = useState<string>('')
   const [isOpen, setIsOpen] = useState(permission === 'default')
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    setValue,
+    watch,
+    trigger,
+  } = useForm<Message>({
+    defaultValues: {
+      token: '',
+      notification: {
+        title: '',
+      },
+    },
+  })
+
+  const onSubmit = handleSubmit((data) => {
+    const formatted = JSON.stringify(formatFormValues(data), null, 2)
+    navigator.clipboard.writeText(formatted)
+    toaster.create({
+      title: 'Success!',
+      type: 'success',
+      duration: 3000,
+      description: 'JSON payload copied to clipboard.',
+      closable: true,
+    })
+  })
 
   const toaster = useToaster()
 
@@ -27,10 +57,12 @@ const App = () => {
     }
   }
 
+  const formValues = watch()
+
   const ClipboardIconButton = () => {
     return (
       <Clipboard.Trigger asChild>
-        <IconButton variant="surface" size="xs" me="-2" disabled={!token} aria-label="Copy to clipboard">
+        <IconButton variant="surface" size="xs" me="-2" disabled={!formValues.token} aria-label="Copy to clipboard">
           <Clipboard.Indicator />
         </IconButton>
       </Clipboard.Trigger>
@@ -52,11 +84,11 @@ const App = () => {
           vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
         })
         if (token) {
-          setToken(token)
+          setValue('token', token)
           toaster.create({
             title: 'Registration token generated.',
             type: 'success',
-            duration: 10000,
+            duration: 5000,
             description: 'Copy to clipboard?',
             action: {
               label: 'Copy',
@@ -64,6 +96,7 @@ const App = () => {
                 navigator.clipboard.writeText(token)
               },
             },
+            closable: true,
           })
         } else {
           console.warn('No registration token available. Request permission to generate one.')
@@ -82,6 +115,22 @@ const App = () => {
     generateToken()
   }, [permission])
 
+  const formatFormValues = (data: Message) => {
+    const result = {
+      message: {
+        ...data,
+        notification: {
+          ...data.notification,
+          body: data.notification?.body || undefined,
+        },
+      },
+    }
+    if (data.notification?.body === '') {
+      delete result.message.notification.body
+    }
+    return result
+  }
+
   return (
     <>
       <Dialog
@@ -96,20 +145,48 @@ const App = () => {
           <Heading>Firebase Cloud Messaging Playground</Heading>
           <ColorModeButton />
         </Flex>
-        <Stack>
-          <Clipboard.Root maxW="300px" value={token}>
-            <Clipboard.Label textStyle="label">Registration Token</Clipboard.Label>
-            <InputGroup endElement={<ClipboardIconButton />}>
-              <Clipboard.Input asChild>
-                <Input disabled={!token} />
-              </Clipboard.Input>
-            </InputGroup>
-          </Clipboard.Root>
-          {permission === 'denied' && (
+        <Stack gap="4" as="form" onSubmit={onSubmit}>
+          <Stack>
+            <Controller
+              control={control}
+              name="token"
+              render={({ field: { value } }) => (
+                <Clipboard.Root maxW="300px" value={value}>
+                  <Clipboard.Label textStyle="label">Registration Token</Clipboard.Label>
+                  <InputGroup endElement={<ClipboardIconButton />}>
+                    <Clipboard.Input asChild>
+                      <Input disabled={!value} />
+                    </Clipboard.Input>
+                  </InputGroup>
+                </Clipboard.Root>
+              )}
+            />
             <Text fontSize="sm" color="red.500">
-              Notification permission denied. Please enable it in your browser / device settings.
+              {permission === 'denied'
+                ? 'Notification permission denied. Please enable it in your browser / device settings.'
+                : ' '}
             </Text>
-          )}
+          </Stack>
+          <Field.Root invalid={!!errors.notification?.title} required>
+            <Field.Label>
+              Title <Field.RequiredIndicator />
+            </Field.Label>
+            <Input
+              {...register('notification.title', {
+                required: 'Title is required',
+                onChange: () => trigger('notification.title'),
+              })}
+            />
+            <Field.ErrorText>{errors.notification?.title?.message ?? ''}</Field.ErrorText>
+          </Field.Root>
+          <Field.Root>
+            <Field.Label>Body</Field.Label>
+            <Input {...register('notification.body')} />
+          </Field.Root>
+          <JsonSnippet code={formatFormValues(formValues)} />
+          <div>
+            <Button type="submit">Copy</Button>
+          </div>
         </Stack>
       </Container>
     </>
