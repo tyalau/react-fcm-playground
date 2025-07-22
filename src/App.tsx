@@ -1,13 +1,29 @@
 import { useEffect, useState } from 'react'
-import { Button, Clipboard, Container, Field, Flex, Heading, IconButton, Input, InputGroup, Stack, Text } from '@chakra-ui/react'
+import {
+  Button,
+  Clipboard,
+  Container,
+  Field,
+  Flex,
+  Heading,
+  HStack,
+  IconButton,
+  Input,
+  InputGroup,
+  Stack,
+  Text,
+} from '@chakra-ui/react'
 import { getToken } from 'firebase/messaging'
-import { useForm, Controller } from 'react-hook-form'
-import { Message } from '@/types/notification'
+import { useFieldArray, useForm, Controller } from 'react-hook-form'
+import { IoIosAdd } from 'react-icons/io'
+import { MdDeleteOutline } from 'react-icons/md'
+import { MessageForm, MessageType, NotificationMessage } from '@/types/notification'
 import { messaging } from '@/lib/firebase'
 import useFcm from '@/hooks/useFcm'
 import useToaster from '@/hooks/useToaster'
 import Dialog from '@/components/Dialog'
 import JsonSnippet from '@/components/JsonSnippet'
+import RadioCard from '@/components/RadioCard'
 import Toaster from '@/components/Toaster'
 import ColorModeButton from '@/containers/ColorModeButton'
 
@@ -16,6 +32,7 @@ const App = () => {
     typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
   )
   const [isOpen, setIsOpen] = useState(permission === 'default')
+  const [messageType, setMessageType] = useState<MessageType>('notification')
   const {
     register,
     handleSubmit,
@@ -24,13 +41,24 @@ const App = () => {
     setValue,
     watch,
     trigger,
-  } = useForm<Message>({
+  } = useForm<MessageForm>({
     defaultValues: {
       token: '',
       notification: {
         title: '',
       },
+      data: [
+        {
+          key: '',
+          value: '',
+        },
+      ],
     },
+  })
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'data',
   })
 
   const onSubmit = handleSubmit((data) => {
@@ -115,21 +143,43 @@ const App = () => {
     generateToken()
   }, [permission])
 
-  const formatFormValues = (data: Message) => {
-    const result = {
-      message: {
-        ...data,
+  const formatFormValues = (formData: MessageForm) => {
+    let message: { data?: unknown } | { notification?: NotificationMessage } = {}
+    if (messageType === 'notification') {
+      message = {
         notification: {
-          ...data.notification,
-          body: data.notification?.body || undefined,
+          title: formData.notification.title,
+          body: formData.notification.body,
         },
+      }
+      if (formData.notification.body === '') {
+        delete message.notification?.body
+      }
+    } else if (messageType === 'data') {
+      message = {
+        data: formData.data.reduce(
+          (result, item) => {
+            if (item.key !== '') {
+              result[item.key] = item.value
+            }
+            return result
+          },
+          {} as Record<string, string>
+        ),
+      }
+    }
+    return {
+      message: {
+        token: formData.token,
+        ...message,
       },
     }
-    if (data.notification?.body === '') {
-      delete result.message.notification.body
-    }
-    return result
   }
+
+  // get the latest error message for data fields
+  const dataMessageError = Array.isArray(errors.data)
+    ? errors.data.reverse().find((field) => field?.key?.message)?.key?.message
+    : undefined
 
   return (
     <>
@@ -167,22 +217,109 @@ const App = () => {
                 : ' '}
             </Text>
           </Stack>
-          <Field.Root invalid={!!errors.notification?.title} required>
-            <Field.Label>
-              Title <Field.RequiredIndicator />
-            </Field.Label>
-            <Input
-              {...register('notification.title', {
-                required: 'Title is required',
-                onChange: () => trigger('notification.title'),
-              })}
-            />
-            <Field.ErrorText>{errors.notification?.title?.message ?? ''}</Field.ErrorText>
-          </Field.Root>
-          <Field.Root>
-            <Field.Label>Body</Field.Label>
-            <Input {...register('notification.body')} />
-          </Field.Root>
+          <RadioCard
+            label="Message Type"
+            value={messageType}
+            onValueChange={(e) => setMessageType(e.value as MessageType)}
+            items={[
+              {
+                value: 'notification',
+                title: 'Notification',
+                description: 'Handled by the FCM SDK automatically',
+              },
+              {
+                value: 'data',
+                title: 'Data',
+                description: 'Handled by the client app',
+              },
+            ]}
+          />
+          {messageType === 'notification' && (
+            <>
+              <Field.Root invalid={!!errors.notification?.title} required={messageType === 'notification'}>
+                <Field.Label>
+                  Title <Field.RequiredIndicator />
+                </Field.Label>
+                <Input
+                  {...register('notification.title', {
+                    required: 'Title is required',
+                    onChange: () => trigger('notification.title'),
+                  })}
+                />
+                <Field.ErrorText>{errors.notification?.title?.message ?? ''}</Field.ErrorText>
+              </Field.Root>
+              <Field.Root>
+                <Field.Label>Body</Field.Label>
+                <Input {...register('notification.body')} />
+              </Field.Root>
+            </>
+          )}
+          {messageType === 'data' && (
+            <>
+              <Stack gap="2">
+                <HStack justifyContent="space-between" alignItems="center">
+                  <Heading size="sm">Payload</Heading>
+                  <Button
+                    type="button"
+                    variant="surface"
+                    size="xs"
+                    onClick={() => {
+                      append({ key: '', value: '' })
+                    }}
+                  >
+                    <IoIosAdd />
+                    Key-Value Pair
+                  </Button>
+                </HStack>
+                {fields.map((field, index) => {
+                  return (
+                    <HStack gap="2" width="full" key={field.id} alignItems="flex-end">
+                      <Field.Root
+                        required={messageType === 'data'}
+                        invalid={Array.isArray(errors?.data) && errors.data.some((f) => !!f.key?.message)}
+                      >
+                        {index === 0 && <Field.Label>Key</Field.Label>}
+
+                        <Input
+                          {...register(`data.${index}.key`, {
+                            required: 'Key is required.',
+                            validate: (value) => {
+                              const duplicated = watch('data').find((f, i) => f.key === value && i !== index)
+                              if (duplicated) {
+                                return 'Each key must be unique.'
+                              }
+                              return true
+                            },
+                            onChange: () => trigger('data'),
+                          })}
+                        />
+                      </Field.Root>
+                      <Field.Root>
+                        {index === 0 && <Field.Label>Value</Field.Label>}
+                        <Input {...register(`data.${index}.value`)} />
+                      </Field.Root>
+                      <IconButton
+                        variant="surface"
+                        disabled={fields.length === 1}
+                        onClick={() => {
+                          remove(index)
+                          trigger('data')
+                        }}
+                      >
+                        <MdDeleteOutline />
+                      </IconButton>
+                    </HStack>
+                  )
+                })}
+              </Stack>
+              {dataMessageError && (
+                <Text fontSize="sm" color="red.500">
+                  {dataMessageError}
+                </Text>
+              )}
+            </>
+          )}
+
           <JsonSnippet code={formatFormValues(formValues)} />
           <div>
             <Button type="submit">Copy</Button>
