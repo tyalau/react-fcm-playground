@@ -1,7 +1,7 @@
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-const JsonSnippet = ({ code }: { code: unknown }) => {
+export default function JsonSnippet({ code }: { code: unknown }) {
   let formatted = '{}'
   if (code) {
     try {
@@ -17,5 +17,3 @@ const JsonSnippet = ({ code }: { code: unknown }) => {
     </SyntaxHighlighter>
   )
 }
-
-export default JsonSnippet

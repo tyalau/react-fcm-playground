@@ -1,7 +1,7 @@
 import { HStack, RadioCard as CuiRadioCard } from '@chakra-ui/react'
 
 type RadioCardProps = CuiRadioCard.RootProps & {
-  label: string
+  label: React.ReactNode
   items: {
     value: string
     title: React.ReactNode

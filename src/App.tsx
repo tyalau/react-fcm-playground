@@ -16,6 +16,7 @@ import {
 import { getToken } from 'firebase/messaging'
 import { useFieldArray, useForm, Controller } from 'react-hook-form'
 import { IoIosAdd } from 'react-icons/io'
+import { LuInfo } from 'react-icons/lu'
 import { MdDeleteOutline } from 'react-icons/md'
 import { MessageForm, MessageType, NotificationMessage } from '@/types/notification'
 import { messaging } from '@/lib/firebase'
@@ -23,9 +24,11 @@ import useFcm from '@/hooks/useFcm'
 import useToaster from '@/hooks/useToaster'
 import Dialog from '@/components/Dialog'
 import JsonSnippet from '@/components/JsonSnippet'
+import Link from '@/components/Link'
 import RadioCard from '@/components/RadioCard'
 import Toaster from '@/components/Toaster'
 import ColorModeButton from '@/containers/ColorModeButton'
+import ToggleTip from './components/ToggleTip'
 
 const App = () => {
   const [permission, setPermission] = useState<NotificationPermission>(
@@ -218,7 +221,26 @@ const App = () => {
             </Text>
           </Stack>
           <RadioCard
-            label="Message Type"
+            label={
+              <HStack alignItems="center" gap="1">
+                Message Type
+                <ToggleTip
+                  icon={<LuInfo />}
+                  content={
+                    <Text>
+                      FCM offers a broad range of messaging options and capabilities.{' '}
+                      <Link
+                        href="https://firebase.google.com/docs/cloud-messaging/concept-options#notifications_and_data_messages"
+                        isExternal
+                      >
+                        Read more
+                      </Link>
+                    </Text>
+                  }
+                  positioning={{ placement: 'right-start' }}
+                />
+              </HStack>
+            }
             value={messageType}
             onValueChange={(e) => setMessageType(e.value as MessageType)}
             items={[
