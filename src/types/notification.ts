@@ -9,8 +9,10 @@ export type NotificationMessage = {
   body?: string
 }
 
-export type Message = {
+export type MessageType = 'notification' | 'data'
+
+export type MessageForm = {
   token: string
-  notification?: NotificationMessage
-  data?: DataMessage
+  notification: NotificationMessage
+  data: { key: string; value: string }[]
 }
