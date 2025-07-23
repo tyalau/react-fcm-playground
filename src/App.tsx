@@ -70,7 +70,7 @@ const App = () => {
     toaster.create({
       title: 'Success!',
       type: 'success',
-      duration: 3000,
+      duration: 5000,
       description: 'JSON payload copied to clipboard.',
       closable: true,
     })
@@ -138,8 +138,9 @@ const App = () => {
         toaster.create({
           title: 'Error',
           type: 'error',
-          duration: 10000,
+          duration: 5000,
           description: 'Unable to generate registration token.',
+          closable: true,
         })
       }
     }
