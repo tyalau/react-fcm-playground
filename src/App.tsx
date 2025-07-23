@@ -16,7 +16,7 @@ import {
 import { getToken } from 'firebase/messaging'
 import { useFieldArray, useForm, Controller } from 'react-hook-form'
 import { IoIosAdd } from 'react-icons/io'
-import { LuInfo } from 'react-icons/lu'
+import { LuExternalLink, LuInfo } from 'react-icons/lu'
 import { MdDeleteOutline } from 'react-icons/md'
 import { MessageForm, MessageType, NotificationMessage } from '@/types/notification'
 import { messaging } from '@/lib/firebase'
@@ -40,7 +40,7 @@ const App = () => {
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isValid },
     setValue,
     watch,
     trigger,
@@ -65,28 +65,18 @@ const App = () => {
   })
 
   const onSubmit = handleSubmit((data) => {
-    const formatted = JSON.stringify(formatFormValues(data), null, 2)
+    const formatted = JSON.stringify(getMessagePayload(data), null, 2)
     navigator.clipboard.writeText(formatted)
     toaster.create({
       title: 'Success!',
       type: 'success',
-      duration: 3000,
+      duration: 5000,
       description: 'JSON payload copied to clipboard.',
       closable: true,
     })
   })
 
   const toaster = useToaster()
-
-  const requestNotificationPermission = async () => {
-    try {
-      const result = await Notification.requestPermission()
-      setPermission(result)
-      setIsOpen(false)
-    } catch (error) {
-      console.error('Error getting notification permission: ', error)
-    }
-  }
 
   const formValues = watch()
 
@@ -104,10 +94,9 @@ const App = () => {
   useEffect(() => {
     if (permission === 'default') {
       setIsOpen(true)
+      return
     }
-  }, [permission])
 
-  useEffect(() => {
     if (permission !== 'granted') return
     const generateToken = async () => {
       try {
@@ -138,15 +127,26 @@ const App = () => {
         toaster.create({
           title: 'Error',
           type: 'error',
-          duration: 10000,
+          duration: 5000,
           description: 'Unable to generate registration token.',
+          closable: true,
         })
       }
     }
     generateToken()
   }, [permission])
 
-  const formatFormValues = (formData: MessageForm) => {
+  const requestNotificationPermission = async () => {
+    try {
+      const result = await Notification.requestPermission()
+      setPermission(result)
+      setIsOpen(false)
+    } catch (error) {
+      console.error('Error getting notification permission: ', error)
+    }
+  }
+
+  const getMessagePayload = (formData: MessageForm) => {
     let message: { data?: unknown } | { notification?: NotificationMessage } = {}
     if (messageType === 'notification') {
       message = {
@@ -176,6 +176,36 @@ const App = () => {
         token: formData.token,
         ...message,
       },
+    }
+  }
+
+  const openApiExplorerUrl = () => {
+    try {
+      // unlikely to happen
+      const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID
+      if (!projectId) throw new Error('Missing FIREBASE_PROJECT_ID')
+
+      const payload = getMessagePayload(formValues)
+      if (!payload) throw new Error('Invalid message payload')
+
+      const params = {
+        parent: `projects/${projectId}`,
+        resource: payload,
+      }
+
+      const encodedParams = encodeURIComponent(JSON.stringify(params))
+      const url = `https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages/send?apix_params=${encodedParams}`
+
+      window.open(url, '_blank')
+    } catch (error) {
+      console.error('Failed to open API Explorer:', error)
+      toaster.create({
+        title: 'Failed to open API Explorer',
+        type: 'error',
+        duration: 5000,
+        description: 'Please check your configuration.',
+        closable: true,
+      })
     }
   }
 
@@ -342,10 +372,14 @@ const App = () => {
             </>
           )}
 
-          <JsonSnippet code={formatFormValues(formValues)} />
-          <div>
+          <JsonSnippet code={getMessagePayload(formValues)} />
+          <HStack gap={2} pb={4}>
             <Button type="submit">Copy</Button>
-          </div>
+            <Button type="button" variant="outline" disabled={!isValid} onClick={openApiExplorerUrl}>
+              Try in API Explorer
+              <LuExternalLink />
+            </Button>
+          </HStack>
         </Stack>
       </Container>
     </>
