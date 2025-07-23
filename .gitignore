@@ -28,5 +28,8 @@ coverage
 *.sln
 *.sw?
 
+# Firebase
+.firebase
+
 public/firebase-messaging-sw.js
 public/utils/notification.js
