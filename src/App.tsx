@@ -104,10 +104,9 @@ const App = () => {
   useEffect(() => {
     if (permission === 'default') {
       setIsOpen(true)
+      return
     }
-  }, [permission])
 
-  useEffect(() => {
     if (permission !== 'granted') return
     const generateToken = async () => {
       try {
