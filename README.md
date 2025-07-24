@@ -3,6 +3,8 @@
 This is a demo project showcasing Firebase Cloud Messaging (FCM) in a modern React app.
 It is based on my [react-ts-boilerplate](https://github.com/tyalau/react-ts-boilerplate) Git Template Repository.
 
+**[View Demo](https://react-fcm-playground.web.app/)**
+
 ## Technologies
 
 - [**React**](https://react.dev/) – A JavaScript library for building user interfaces.
@@ -62,6 +64,8 @@ VITE_FIREBASE_APP_ID=your-app-id
 VITE_FIREBASE_VAPID_KEY=your-public-vapid-key
 ```
 
+Edit `.firebaserc` with your project ID if you would like to use the Firebase CLI.
+
 Run the dev server:
 
 ```bash
@@ -98,9 +102,11 @@ pnpm dev
 
      ![FCM Token Text Field](./assets/fcm-token-text-field.png)
 
-4. You can use the generated token to send push notifications via the [Firebase Cloud Messaging v1 API](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages/send) (learn more about [message types](https://firebase.google.com/docs/cloud-messaging/concept-options#notifications_and_data_messages)):
+4. You can compose and preview the payload (learn more about [message types](https://firebase.google.com/docs/cloud-messaging/concept-options#notifications_and_data_messages)):
 
    - **Notification Message**
+
+     ![Notification Message Payload](./assets/notification-message-payload.png)
 
      ```json
      {
@@ -116,10 +122,9 @@ pnpm dev
 
    - **Data Message**
 
-     To customize the payload, update the following files:
+     You can define the key-value pairs:
 
-     - [`DataMessage`](./src/types/notification.ts): Defines the data payload.
-     - [`composeNotification`](./src/utils/notification.ts): Handles how the data payload is converted into a notification.
+     ![Data Message Payload](./assets/data-message-payload.png)
 
      ```json
      {
@@ -129,3 +134,19 @@ pnpm dev
        }
      }
      ```
+
+     To customize the payload, update the following files:
+
+     - [`DataMessage`](./src/types/notification.ts): Defines the data payload.
+     - [`composeNotification`](./src/utils/notification.ts): Handles how the data payload is converted into a notification.
+
+5. You may copy the payload and send push notifications via the [Firebase Cloud Messaging v1 API](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages/send), or click "Try in API Explorer" and open the API url with the project ID and payload prefilled.
+
+   ![Action Buttons](./assets/action-buttons.png)
+
+## Deployment
+
+This project is deployed to Firebase Hosting using GitHub Actions.
+
+You can find thecode workflow at:
+[`.github/workflows/firebase-hosting.yml`](.github/workflows/firebase-hosting-merge.yml)
