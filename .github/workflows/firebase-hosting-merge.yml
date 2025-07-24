@@ -46,4 +46,4 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_REACT_FCM_PLAYGROUND }}
           channelId: live
-          projectId: react-fcm-playground
+          projectId: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
