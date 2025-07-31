@@ -148,5 +148,5 @@ pnpm dev
 
 This project is deployed to Firebase Hosting using GitHub Actions.
 
-You can find thecode workflow at:
+You can find the workflow at:
 [`.github/workflows/firebase-hosting.yml`](.github/workflows/firebase-hosting-merge.yml)
