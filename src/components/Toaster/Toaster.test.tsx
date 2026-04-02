@@ -42,7 +42,7 @@ describe('Toaster', () => {
     })
 
     expect(screen.getByText('Loading...')).toBeInTheDocument()
-    expect(screen.getByRole('status')).toBeInTheDocument()
+    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
   })
 
   it('renders a toast with closable trigger', async () => {
