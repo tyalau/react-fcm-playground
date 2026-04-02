@@ -34,7 +34,7 @@
     "react-syntax-highlighter": "^15.6.6"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.7.1",
+    "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^19.7.1",
     "@dotenvx/dotenvx": "^1.44.1",
     "@eslint/js": "^9.34.0",
