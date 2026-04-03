@@ -26,7 +26,7 @@ It is based on my [react-ts-boilerplate](https://github.com/tyalau/react-ts-boil
 
 Ensure you have the followings:
 
-- [Node.js](https://nodejs.org/) (>= v22.16.0)
+- [Node.js](https://nodejs.org/) (>= v24.14.1)
 - [PNPM](https://pnpm.io/) (>= v10.6.3)
 - A [Firebase project](https://firebase.google.com/) with Cloud Messaging enabled
   (and VAPID key + web app credentials generated)
