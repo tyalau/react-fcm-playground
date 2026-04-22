@@ -36,7 +36,7 @@
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
-    "@dotenvx/dotenvx": "^1.44.1",
+    "@dotenvx/dotenvx": "^1.61.4",
     "@eslint/js": "^9.34.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.9.1",
